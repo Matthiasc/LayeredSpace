@@ -3,6 +3,7 @@
 	
 	import be.dreem.ui.layeredSpace.constants.*;
 	import be.dreem.ui.layeredSpace.effects.*;
+	import be.dreem.ui.layeredSpace.feedback.RenderStatsGraph;
 	import be.dreem.ui.layeredSpace.geom.*;
 	import be.dreem.ui.layeredSpace.objects.*;
 	import be.dreem.ui.layeredSpace.layers.*;
@@ -20,12 +21,13 @@
 	public class Carousel extends MovieClip {		
 		
 		public var ls:LayeredSpace;
-		public var camera:IsoMetricCamera;
+		public var camera:StandardCamera;
 		public var camera2:StandardCamera;
 		public var camera3:StandardCamera;
 		public var currentCamera:CameraObject;
 		public var screen:StandardScreen;
 		public var controls:Sprite;
+		public var renderStatsGraph:RenderStatsGraph;
 		
 		private var handShakeX:Number = 0;
 		private var handShakeY:Number = 0;
@@ -59,10 +61,10 @@
 			
 			_fogEffect = new FogEffect();
 			_fogEffect.color = 0xFFFFFF;
-			_fogEffect.value = 0.03;
+			_fogEffect.value = 0.08;
 			
 			_dofEffect = new DofEffect();
-			_dofEffect.value = 1;
+			_dofEffect.value = 6;
 			
 			ls.effects.add(_fogEffect);
 			ls.effects.add(_dofEffect);
@@ -70,30 +72,33 @@
 			//create screen
 			screen = new StandardScreen(new Rectangle(0, 0, 300, 300));
 			screen.backgroundColor = 0xFFFFFF;
-			screen.blendMode = BlendMode.ADD;
+			//screen.blendMode = BlendMode.ADD;
 			
 			//create camera
 			camera2 = new StandardCamera();
-			camera2.position = new Point3D(-100, -500, 800);
-			camera2.focusDistance = camera2.z - uiDiameter;
+			camera2.position = new Point3D(-100, -200, 800);
+			camera2.focusDistance = camera2.z + uiDiameter;
+			camera2.viewingDistanceStart = 1000;
+			camera2.viewingDistanceEnd = 2000;
 			camera2.rotation = 45;		
-			camera2.angle = 20;
-			camera2.focusDistance = 1200;
-			//camera2.depthOfFieldValue = 3;
-			//camera2.useDepthOfField = true;
+			camera2.angle = 30;
 			camera2.screen = screen;
 			
 			camera3 = new StandardCamera();
 			camera3.position = new Point3D(600, -300, 6000);
-			camera3.angle = 30;
+			camera3.focusDistance = camera3.z - uiDiameter;
+			camera2.viewingDistanceStart = 100;
+			camera3.angle = 90;
 			camera3.screen = screen;
 			
-			currentCamera = camera = new IsoMetricCamera();
+			currentCamera = camera = new StandardCamera();
 			camera.z = 1800;
 			camera.y = -1000;
-			//camera.depthOfFieldValue = 3;
-			//camera.useDepthOfField = true;
+			camera.focusDistance = 1800;
+			camera2.viewingDistanceStart = 100;
 			camera.screen = screen;
+			
+			renderStatsGraph = new RenderStatsGraph(ls);
 			
 			//Tweener.addTween(camera,{y:200,time:3,transition:"easeInOutBack"});
 			TweenLite.to(camera, 1, { y:-200, ease:Back.easeOut } );
@@ -101,14 +106,13 @@
 			//screen.showRenderDetails = true;
 			
 			addChild(screen);
+			addChild(renderStatsGraph);
 			
 			//link 
-			ls.camera = camera;
-			
+			ls.camera = camera;			
 			
 			//create circular			
-			aBalls = new Array();
-			
+			aBalls = new Array();			
 			
 			for (var i:uint = 0; i < uiItemCount; i++) { 
 				
@@ -184,6 +188,7 @@
 		public function onStageResize(e:Event=null):void{
 			//resize screen
 			screen.dimensions = new Rectangle(100,100,stage.stageWidth - 200,stage.stageHeight - 200 - controls.height);
+			screen.dimensions = new Rectangle(0,0,stage.stageWidth,stage.stageHeight);
 			
 			//reposition controls
 			controls.x = Math.round((stage.stageWidth - controls.width)/2)
@@ -325,6 +330,8 @@
 		
 		private function details(e:MouseEvent):void{
 			//screen.showRenderDetails = !screen.showRenderDetails;
+			//screen.showRenderDetails
+
 		}
 		
 		private function fog(e:MouseEvent):void {

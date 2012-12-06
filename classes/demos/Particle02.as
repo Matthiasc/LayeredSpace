@@ -135,9 +135,9 @@ package  demos {
 		
 		private function shakeCamera(ratio:Number):void {
 			ratio = Math.pow(ratio, 3);
-			_camera.x = ((Math.random() > .5) ? -1 : 1) * Math.random() * 20 * ratio;
-			_camera.y = ((Math.random() > .5) ? -1 : 1) * Math.random() * 20 * ratio;
-			_camera.z = 1000 + ((Math.random() > .5) ? -1 : 1) * Math.random() * 20 * ratio; 
+			_camera.x = ((Math.random() > .5) ? -1 : 1) * Math.random() * 15 * ratio;
+			_camera.y = ((Math.random() > .5) ? -1 : 1) * Math.random() * 15 * ratio;
+			_camera.z = 1000 + ((Math.random() > .5) ? -1 : 1) * Math.random() * 15 * ratio; 
 		}
 		//*/
 		
@@ -240,7 +240,7 @@ package  demos {
 		
 		private function updateDimensions():void {
 			//adjust the dimensions of the canvas
-			_screen.dimensions = new Rectangle(10, 10, stage.stageWidth - 20, stage.stageHeight - 20);
+			_screen.dimensions = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 		}
 		
 	}

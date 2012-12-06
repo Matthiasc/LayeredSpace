@@ -98,6 +98,7 @@ package be.dreem.ui.layeredSpace.cameras {
 		 */
 		override public function seesVisual(layer:VisualObject):Boolean {
 			var depth:Number = z - layer.z;
+			//return false;
 			return (depth > viewingDistanceStart && ((depth < viewingDistanceEnd) || (viewingDistanceEnd == 0)))
 		}
 		

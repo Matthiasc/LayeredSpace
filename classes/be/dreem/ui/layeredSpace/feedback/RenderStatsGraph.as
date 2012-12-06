@@ -36,7 +36,7 @@ package be.dreem.ui.layeredSpace.feedback {
 		private var _t:Timer;
 		
 		
-		public function RenderStatsGraph() {
+		public function RenderStatsGraph(pLayeredSpace:LayeredSpace = null) {
 			
 			_tfLabels = new TextField();
 			_tfLabels.autoSize = TextFieldAutoSize.LEFT;
@@ -84,6 +84,8 @@ package be.dreem.ui.layeredSpace.feedback {
 			//_t.addEventListener(TimerEvent.TIMER, function(e:TimerEvent){updateStats()}, false, 0, true);
 			
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+			
+			layeredSpace = pLayeredSpace;
 		}
 		
 		private function onMouseDown(e:MouseEvent):void {

@@ -72,7 +72,7 @@ package be.dreem.ui.layeredSpace.cameras {
 				var x:Number = layer.x - x;
 				var y:Number = layer.y - y;				
 				projection.zDepth = z - layer.z;
-				var angleRatio:Number = angle / 45;
+				var angleRatio:Number = 45/angle;
 				var depthRatio:Number = DISTANCE_RATIO / projection.zDepth;
 				var s:Number = Math.sin( -rotation * TORADIANS);
 				var c:Number = Math.cos( -rotation * TORADIANS);

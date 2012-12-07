@@ -28,7 +28,7 @@ package be.dreem.ui.layeredSpace.feedback {
 		
 		private var _graph:Bitmap;
 		private const _numberOfSections:int = 2;
-		private const _sectionHeight:int = 50;
+		private const _sectionHeight:int = 20;
 		private const _sectionColor:int = 0x333333;
 		
 		private var _maxLayersRendered:int = 0;
@@ -44,7 +44,7 @@ package be.dreem.ui.layeredSpace.feedback {
 			_tfLabels.textColor = 0xFFFFFF;
 			_tfLabels.defaultTextFormat = new TextFormat("Arial", null, 0xFFFFFF);
 			_tfLabels.mouseEnabled = false;
-			_tfLabels.text = "version: ";
+			_tfLabels.text = "LayeredSpace: ";
 			//_tfLabels.defaultTextFormat = new TextFormat("Arial", null, 0x0000FF);
 			_tfLabels.setTextFormat(new TextFormat("Arial", null, 0xFF6666), _tfLabels.length - 1);
 			//_tfLabels.textColor = 0xFF00FF;
@@ -127,7 +127,7 @@ package be.dreem.ui.layeredSpace.feedback {
 			
 			_graph.bitmapData.scroll(-1, 0);
 			
-			_tfValues.htmlText =  LayeredSpace.VERSION + "\n" + stats.currentFps + "\n" + stats.averageFps + "\n" + stats.numberOfLayers + "\n" + stats.numberOfViewedLayers + "\n" + Number(stats.memory / 1024).toPrecision(3);
+			_tfValues.htmlText =  "v" + LayeredSpace.VERSION + "\n" + stats.currentFps + "\n" + stats.averageFps + "\n" + stats.numberOfLayers + "\n" + stats.numberOfViewedLayers + "\n" + Number(stats.memory / 1024).toPrecision(3);
 			_tfValues.x = _graphWidth - _tfValues.width;
 			
 			

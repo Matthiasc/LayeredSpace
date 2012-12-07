@@ -53,7 +53,7 @@ package be.dreem.ui.layeredSpace.cameras {
 		
 		public static const DEFAULT_POSITION:Point3D = new Point3D(0, 0, 1000);
 		
-		private var _nViewingDistanceStart:Number = 0;
+		private var _nViewingDistanceStart:Number = 100;
 		private var _nViewingDistanceEnd:Number = 0;
 		
 		
@@ -97,8 +97,12 @@ package be.dreem.ui.layeredSpace.cameras {
 		 * @return
 		 */
 		override public function seesVisual(layer:VisualObject):Boolean {
-			var depth:Number = z - layer.z;
-			//return false;
+			//layer behind camera
+			if (layer.z > z)	
+				return false;
+			
+			//layer between viewingDistances?
+			var depth:Number =  Math.abs(layer.z - z);
 			return (depth > viewingDistanceStart && ((depth < viewingDistanceEnd) || (viewingDistanceEnd == 0)))
 		}
 		

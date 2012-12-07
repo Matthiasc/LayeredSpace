@@ -1,6 +1,5 @@
 ﻿package  demos {
 	
-	
 	import be.dreem.ui.layeredSpace.constants.*;
 	import be.dreem.ui.layeredSpace.effects.*;
 	import be.dreem.ui.layeredSpace.feedback.RenderStatsGraph;
@@ -78,8 +77,7 @@
 			camera2 = new StandardCamera();
 			camera2.position = new Point3D(-100, -200, 800);
 			camera2.focusDistance = camera2.z + uiDiameter;
-			camera2.viewingDistanceStart = 1000;
-			camera2.viewingDistanceEnd = 2000;
+			camera2.viewingDistanceStart = 500;
 			camera2.rotation = 45;		
 			camera2.angle = 30;
 			camera2.screen = screen;
@@ -87,7 +85,7 @@
 			camera3 = new StandardCamera();
 			camera3.position = new Point3D(600, -300, 6000);
 			camera3.focusDistance = camera3.z - uiDiameter;
-			camera2.viewingDistanceStart = 100;
+			camera3.viewingDistanceStart = 500;
 			camera3.angle = 90;
 			camera3.screen = screen;
 			
@@ -95,7 +93,7 @@
 			camera.z = 1800;
 			camera.y = -1000;
 			camera.focusDistance = 1800;
-			camera2.viewingDistanceStart = 100;
+			camera.viewingDistanceStart = 500;
 			camera.screen = screen;
 			
 			renderStatsGraph = new RenderStatsGraph(ls);
@@ -138,7 +136,7 @@
 			
 			_t2 = new Timer(1000);
 			_t2.addEventListener(TimerEvent.TIMER,randomCamSwitch);
-			_t2.start();
+			//_t2.start();
 				
 			stage.addEventListener(Event.RESIZE,onStageResize);
 			
@@ -331,6 +329,7 @@
 		private function details(e:MouseEvent):void{
 			//screen.showRenderDetails = !screen.showRenderDetails;
 			//screen.showRenderDetails
+			renderStatsGraph.visible = !renderStatsGraph.visible;
 
 		}
 		

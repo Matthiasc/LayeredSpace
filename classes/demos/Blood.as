@@ -5,6 +5,7 @@
 	import be.dreem.ui.layeredSpace.constants.SortingModes;
 	import be.dreem.ui.layeredSpace.effects.DofEffect;
 	import be.dreem.ui.layeredSpace.effects.FogEffect;
+	import be.dreem.ui.layeredSpace.feedback.RenderStatsGraph;
 	import be.dreem.ui.layeredSpace.geom.*;
 	import be.dreem.ui.layeredSpace.objects.*;
 	import be.dreem.ui.layeredSpace.screens.*;
@@ -25,6 +26,10 @@
 		public var screen:StandardScreen;
 		public var controls:Sprite;
 		
+		private var text:Sprite;
+		
+		public var btnRestart:Sprite;
+		
 		public var handShakeX:Number = 0;
 		public var handShakeY:Number = 0;
 		public var handShakeZ:Number = 0;
@@ -32,6 +37,12 @@
 		
 		var fxFog:FogEffect;
 		var fxDof:DofEffect;
+		
+		private var _bloodCollection:Array;
+		private var _splatCount:uint = 0
+		private const MAX_SPLATS:uint = 3;
+		
+		private var _renderStatsGraph:RenderStatsGraph;
 		
 		function Blood(){
 			
@@ -41,45 +52,48 @@
 			
 			//layeredSpace aanmaken
 			ls = new LayeredSpace();
-			ls.sortingMode = SortingModes.FRAME;
+			ls.sortingMode = SortingModes.FRAME;			
 			
+			//camera
+			camera = new StandardCamera();
+			camera.z = 1000;
+			camera.x = -1000;
+			camera.y = 0;
+			camera.focusDistance = 1000;
+			camera.viewingDistanceStart = 50;
+			
+			//effects
 			fxFog = new FogEffect();
 			fxFog.color = 0xFFFFFF;
-			fxFog.value = .5;
-			fxFog.startDistance = 500;
+			fxFog.value = .3;
+			fxFog.startDistance = 1000;
 			
 			fxDof = new DofEffect();
 			fxDof.quality = 2;
-			fxDof.value = 20;
-			fxDof.startDistance = 500;
+			fxDof.value = 8;
 			
-			ls.effects.add(fxFog);
-			ls.effects.add(fxDof);
+			camera.effects.add(fxFog);
+			camera.effects.add(fxDof);
 			
-			//camera aanmaken
-			camera = new StandardCamera();
-			camera.z = 500;
-			camera.x = -1000;
-			camera.y = 0;
-			//camera.focusDistance = 1500;
-			//camera.depthOfFieldValue = 30;
-			//camera.useDepthOfField = true;
-			
-			//screen aanmaken		
+			//screen		
 			screen = new StandardScreen(new Rectangle(0, 0, 200, 200));		
 			screen.backgroundColor = 0xFFFFFF;
 			addChild(screen);
-			screen.blendMode = BlendMode.ADD
+			screen.blendMode = BlendMode.ADD;
 			
-			//koppeling
+			//linkage
 			ls.camera = camera;
 			camera.screen = screen;
 			
-			//begin visuals aanmaken
+			//visuals
+			
+			_bloodCollection = new Array();
+			
 			var layer:VisualLayer;
 			var spBlood:Sprite;
 			
-			var text:Sprite = new bloodText();
+			text = new bloodText();
+			text.buttonMode = true;
 			text.addEventListener(MouseEvent.CLICK, createBloodSplat, false, 0, true);
 			ls.addLayer(new VisualLayer(text));
 			
@@ -103,10 +117,32 @@
 			addEventListener(Event.ENTER_FRAME, onBloodEnterFrame, false, 0, true);				
 			stage.addEventListener(Event.RESIZE, onStageResize, false, 0, true);
 			
-			createControls();
+			//createControls();
+			btnRestart = new BtnRestart();
+			btnRestart.buttonMode = true;
+			btnRestart.blendMode = BlendMode.LAYER;
+			btnRestart.alpha = .5;
+			btnRestart.addEventListener(MouseEvent.CLICK, onBtnRestartClick, false, 0, true);
+			addChild(btnRestart);
+			
 			onStageResize();
 			
 			TweenLite.to(camera, 1, { ease:Cubic.easeInOut, x:0 } );
+			
+			_renderStatsGraph = new RenderStatsGraph(ls);
+			//_renderStatsGraph.visible = false;
+			addChild(_renderStatsGraph);
+		}
+		
+		private function onBtnRestartClick(e:MouseEvent):void {
+			_splatCount = 0;
+			
+			while (_bloodCollection.length)
+				VisualLayer(_bloodCollection.pop()).removeLayer = true;
+				
+			TweenLite.to(camera, 1, { rotation:0, x:0, y:0, ease:Back.easeOut } );
+			
+			text.buttonMode = true;
 		}
 		
 		private function onBloodEnterFrame(e:Event):void {
@@ -115,27 +151,36 @@
 		}
 		
 		private function createBloodSplat(e:MouseEvent=null):void{
-		
-			for(var i:uint=0; i < 60; i++){
+			if (_splatCount < MAX_SPLATS) {
 				
-				var s:Sprite = getRandomBlood();
+				for(var i:uint=0; i < 40; i++){
+					
+					var s:Sprite = getRandomBlood();
+					
+					var px:Number = ((Math.random() > 0.5) ? -1 : 1 ) * (50 + Math.round(Math.random() * 400));
+					var py:Number = ((Math.random() > 0.5) ? -1 : 1 ) * (50 + Math.round(Math.random() * 400));
+					var pz:Number = ((Math.random() > 0.5) ? -1 : 1 ) * Math.round(Math.random() * 800);
 				
-								
-				var px:Number = ((Math.random() > 0.5) ? -1 : 1 ) * Math.round(Math.random() * 500);
-				var py:Number = ((Math.random() > 0.5) ? -1 : 1 ) * Math.round(Math.random() * 500);
-				var pz:Number = ((Math.random() > 0.5) ? -1 : 1 ) * Math.round(Math.random() * 250);
-			
-				var l:VisualLayer = new VisualLayer(s);
-				l.scale = Math.random();
-				l.rotation = Math.atan(py/px) *180 / Math.PI;
-				TweenLite.to(l, .1, { x:px, z:pz, y:py, ease:Cubic.easeOut } );
-				ls.addLayer(l);
+					var l:VisualLayer = new VisualLayer(s);
+					l.scale = Math.random();
+					l.rotation = Math.atan(py/px) *180 / Math.PI;
+					TweenLite.to(l, .12, { x:px, z:pz, y:py, ease:Cubic.easeOut } );
+					ls.addLayer(l);
+					
+					_bloodCollection.push(l);
+				}
+				
+				TweenLite.to(camera, .2, { z:(camera.z + 500), angle:camera.angle + 30, onComplete:moveCamBack, ease:Back.easeOut } );
+				
+				_splatCount++;
+				
+				if (_splatCount >= MAX_SPLATS)
+					text.buttonMode = false;
 			}
-			TweenLite.to(camera, .25, { z:(camera.z + 100), angle:camera.angle - 20, onComplete:moveCamBack, ease:Back.easeOut } );
 		}
 		
 		private function moveCamBack():void{
-			TweenLite.to(camera, 4, { z:(camera.z - 100), angle:45, ease:Back.easeInOut } );
+			TweenLite.to(camera, 4, { z:(1000), angle:45, ease:Back.easeInOut } );
 		}
 		
 		private function getRandomBlood():Sprite{
@@ -232,11 +277,14 @@
 		
 		public function onStageResize(e:Event=null):void{
 			//resize screen
-			screen.dimensions = new Rectangle(50,50,stage.stageWidth - 100,stage.stageHeight - 100 - controls.height);
+			screen.dimensions = new Rectangle(0,0,stage.stageWidth,stage.stageHeight);
+			
+			btnRestart.x = stage.stageWidth - btnRestart.width - 10;
+			btnRestart.y = 10;
 			
 			//reposition controls
-			controls.x = Math.round((stage.stageWidth - controls.width)/2)
-			controls.y = stage.stageHeight - controls.height;
+			//controls.x = Math.round((stage.stageWidth - controls.width)/2)
+			//controls.y = stage.stageHeight - controls.height;
 		}
 		
 		
@@ -256,7 +304,7 @@
 		private function createControls():void{
 			controls = new Controls();
 			addChild(controls);
-			trace(controls);
+			
 			var s:Sprite;
 			
 			s = controls.getChildByName("xUp_mc") as Sprite;
@@ -381,12 +429,11 @@
 		}
 		
 		private function dof(e:MouseEvent):void{
-			//camera.useDepthOfField = !camera.useDepthOfField;
 			fxDof.enable = !fxDof.enable;
 		}
 		
 		private function details(e:MouseEvent):void{
-			//screen.showRenderDetails = !screen.showRenderDetails;
+			_renderStatsGraph.visible = !_renderStatsGraph.visible;
 		}
 		
 		private function fog(e:MouseEvent):void {

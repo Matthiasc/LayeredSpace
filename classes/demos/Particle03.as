@@ -54,32 +54,27 @@ package  demos {
 			_screen.showBackground = false;
 			//_screen.blendMode = BlendMode.ADD;		
 			
+			//camera
 			_camera = new StandardCamera();
+			_camera.focusDistance = 1000;
 			
 			_layeredSpace.camera = _camera;
 			_camera.screen = _screen;
-			//_screen.showRenderDetails = true;
 			
-			_renderStatsGraph = new RenderStatsGraph();
-			_renderStatsGraph.layeredSpace = _layeredSpace;
+			_renderStatsGraph = new RenderStatsGraph(_layeredSpace);
 			
 			
-			//camera
-			//_camera.useDepthOfField = true;
-			//_camera.depthOfFieldValue = 20;
-			//_camera.viewingDistanceStart = 400;
-			//_camera.viewingDistanceEnd = 4000;
+			
 			
 			var fogEffect:FogEffect = new FogEffect();
 			fogEffect.value = .05;
 			fogEffect.fogMode = FogModes.ALPHA;
-			_layeredSpace.effects.add(fogEffect);
+			//_layeredSpace.effects.add(fogEffect);
 			
 			var dofEffect:DofEffect = new DofEffect();
-			dofEffect.value = 1;
+			dofEffect.value = 3;
 			dofEffect.quality = 1;
 			_layeredSpace.effects.add(dofEffect);
-			//dofEffect.enable = false;
 			
 			
 			tracker = new Tracker() as Sprite;

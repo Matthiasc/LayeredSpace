@@ -9,8 +9,7 @@
 	import be.dreem.ui.layeredSpace.cameras.*;
 	import be.dreem.ui.layeredSpace.screens.*;
 	import com.greensock.easing.Back;
-	import com.greensock.TweenLite;
-	
+	import com.greensock.TweenLite;	
 	
 	import flash.display.*;
 	import flash.events.*;
@@ -27,11 +26,6 @@
 		public var screen:StandardScreen;
 		public var controls:Sprite;
 		public var renderStatsGraph:RenderStatsGraph;
-		
-		private var handShakeX:Number = 0;
-		private var handShakeY:Number = 0;
-		private var handShakeZ:Number = 0;
-		private var handShakeR:Number = 0;
 		
 		private var aBalls:Array;
 		private var globalRotation:Number = 0;
@@ -52,10 +46,6 @@
 			
 			//create layeredSpace
 			ls = new LayeredSpace();
-			//ls.useFog = true;
-			//ls.fogMode = FogModes.TINT;
-			//ls.fogValue = .1;
-			//ls.fogDistanceStart = 1800 + 600;
 			ls.sortingMode = SortingModes.FRAME;
 			
 			_fogEffect = new FogEffect();
@@ -66,7 +56,7 @@
 			_dofEffect.value = 6;
 			
 			ls.effects.add(_fogEffect);
-			ls.effects.add(_dofEffect);
+			ls.effects.add(_dofEffect);			
 			
 			//create screen
 			screen = new StandardScreen(new Rectangle(0, 0, 300, 300));
@@ -75,18 +65,18 @@
 			
 			//create camera
 			camera2 = new StandardCamera();
-			camera2.position = new Point3D(-100, -200, 800);
+			camera2.position = new Point3D(-100, -400, 1000);
 			camera2.focusDistance = camera2.z + uiDiameter;
-			camera2.viewingDistanceStart = 500;
+			camera2.viewingDistanceStart = 100;
 			camera2.rotation = 45;		
-			camera2.angle = 30;
+			camera2.angle = 150;
 			camera2.screen = screen;
 			
 			camera3 = new StandardCamera();
 			camera3.position = new Point3D(600, -300, 6000);
 			camera3.focusDistance = camera3.z - uiDiameter;
 			camera3.viewingDistanceStart = 500;
-			camera3.angle = 90;
+			camera3.angle = 40;
 			camera3.screen = screen;
 			
 			currentCamera = camera = new StandardCamera();
@@ -95,13 +85,10 @@
 			camera.focusDistance = 1800;
 			camera.viewingDistanceStart = 500;
 			camera.screen = screen;
-			
 			renderStatsGraph = new RenderStatsGraph(ls);
+			//renderStatsGraph.visible = false;
 			
-			//Tweener.addTween(camera,{y:200,time:3,transition:"easeInOutBack"});
 			TweenLite.to(camera, 1, { y:-200, ease:Back.easeOut } );
-			
-			//screen.showRenderDetails = true;
 			
 			addChild(screen);
 			addChild(renderStatsGraph);
@@ -116,8 +103,6 @@
 				
 				//create sprites
 				var s:Sprite = new Ball();
-				//s.n = i;
-				//s.addEventListener(MouseEvent.CLICK,onBallClick);
 				
 				//create layer
 				var l:VisualLayer = new VisualLayer(s);
@@ -131,24 +116,25 @@
 			
 			updateRotation();			
 			
-			
 			addEventListener(Event.ENTER_FRAME, update);
 			
-			_t2 = new Timer(1000);
+			_t2 = new Timer(2000);
 			_t2.addEventListener(TimerEvent.TIMER,randomCamSwitch);
-			//_t2.start();
+			_t2.start();
 				
 			stage.addEventListener(Event.RESIZE,onStageResize);
 			
-			//createControls
 			createControls();
-			
 			onStageResize();
 			
 		}
 		
 		private function update(e:Event):void {
 			updateRotation();
+			
+			if(currentCamera.y > -100)
+				currentCamera.y =  -100;
+			
 			ls.update();
 		}
 		

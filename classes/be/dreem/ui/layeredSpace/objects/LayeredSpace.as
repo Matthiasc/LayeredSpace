@@ -30,6 +30,11 @@
 */
 
 /**
+ * changes
+ * - camera viewingDistance fixed
+ */
+
+/** 
  * changes v2.1
  * 
  * - new core part of layeredSpace, faster cleaner and with less code
@@ -131,7 +136,6 @@ package be.dreem.ui.layeredSpace.objects {
 			
 			_t = new Timer(100);
 			_t.addEventListener(TimerEvent.TIMER, updateRenderStats, false, 0, true);
-			//_t.start();
 		}
 		
 		/*
@@ -157,15 +161,14 @@ package be.dreem.ui.layeredSpace.objects {
 			for (var i:int = 0; i < l; i++)
 				renderLayer(_aLayers[i], i);
 			
-			_renderStats.numberOfViewedLayers = _iTempVisibleLayerCount;			
+			_renderStats.numberOfViewedLayers = _iTempVisibleLayerCount;		
 		}
 		
 		private function renderLayer(layer:VisualObject, zIndex:uint):void {			
 			
 			_spCanvas = _screen.container;
 			_bVisible = true;
-			_spLayer = layer.container;
-			
+			_spLayer = layer.container;			
 			
 			//layer.showAnchorPoint = _screen.showAnchorPoints;
 			
@@ -192,7 +195,7 @@ package be.dreem.ui.layeredSpace.objects {
 					
 					//if (!effects.render(layer, projection, _camera))
 						//_bVisible = false;
-					_spLayer.filters = effects.render(layer, projection, _camera);
+					_spLayer.filters = effects.render(layer, projection, _camera).concat(camera.effects.render(layer,projection,_camera));
 					
 				}else {					
 					//the layer is completely outside the screen's viewing area so do not render the layer.
@@ -339,11 +342,9 @@ package be.dreem.ui.layeredSpace.objects {
 		}
 		
 		private function updateRenderStats(e:TimerEvent):void {
-			//_renderStats.currentFps = _iFrameCount;
 			
-			var _now:int = new Date().getTime();			
+			var _now:int = new Date().getTime();		
 			
-			//trace( );
 			_renderStats.currentFps = 1 / ((_now - _time) * .001);
 			
 			if (!_renderStats.averageFps)
@@ -352,17 +353,12 @@ package be.dreem.ui.layeredSpace.objects {
 			//add fps sample
 			_aFpsSamples.shift();
 			_aFpsSamples.push(_renderStats.currentFps);
-			/*
-			_iCurrentFpsSample++;
-			_iCurrentFpsSample = (_iCurrentFpsSample >= _aFpsSamples.length) ? 0 : _iCurrentFpsSample;
-			_aFpsSamples[_iCurrentFpsSample] = _renderStats.currentFps;
-			*/
+			
 			var nTotal:int = 0;
 			for (var i:int = 0; i < _aFpsSamples.length; i++)
 				nTotal += _aFpsSamples[i];
 			
 			_renderStats.averageFps = Math.round(nTotal / _aFpsSamples.length);
-			//_iFrameCount = 0;
 			
 			_time = _now;
 		}

@@ -62,7 +62,6 @@ package be.dreem.ui.layeredSpace.screens {
 		protected function update():void {
 			_pCenter = new Point(_rDimensions.x + (_rDimensions.width * .5), _rDimensions.y + (_rDimensions.height * .5));
 			
-			
 			graphics.clear();
 			
 			if (_bBackground) {

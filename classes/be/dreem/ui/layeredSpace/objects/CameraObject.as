@@ -49,15 +49,12 @@ package be.dreem.ui.layeredSpace.objects {
 		}
 		
 		public function focusToObject(object:SpaceObject):SpaceObject {			
-			focusDistance = z - object.z;
-			
+			focusDistance = z - object.z;			
 			return object;
 		}
 		
-		public function focusToPoint(p:Point3D):Point3D {
-			
-			focusDistance = z - p.z;
-			
+		public function focusToPoint(p:Point3D):Point3D {			
+			focusDistance = z - p.z;			
 			return p;
 		}
 		
@@ -92,8 +89,6 @@ package be.dreem.ui.layeredSpace.objects {
 			}else{
 				_nAngle = n;
 			}
-		}
-		
+		}		
 	}
-
 }

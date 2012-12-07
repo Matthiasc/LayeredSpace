@@ -53,7 +53,6 @@ package be.dreem.ui.layeredSpace.objects {
 			
 			//create containers
 			_spScreen = new Sprite();
-			//_shMask = new Shape();
 			
 			//add to view
 			addChild(_spContainer);

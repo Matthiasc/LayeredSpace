@@ -6,6 +6,7 @@ package be.dreem.ui.layeredSpace.feedback {
 	import flash.display.InteractiveObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.text.StyleSheet;
@@ -24,7 +25,7 @@ package be.dreem.ui.layeredSpace.feedback {
 		private var _tfLabels:TextField;
 		private var _tfValues:TextField;
 		
-		private const _graphWidth:int = 200;
+		private const _graphWidth:int = 150;
 		
 		private var _graph:Bitmap;
 		private const _numberOfSections:int = 2;
@@ -33,8 +34,9 @@ package be.dreem.ui.layeredSpace.feedback {
 		
 		private var _maxLayersRendered:int = 0;
 		
-		private var _t:Timer;
+		private var _autoDim:Boolean = true;
 		
+		public var toggleKey:String = "Z";
 		
 		public function RenderStatsGraph(pLayeredSpace:LayeredSpace = null) {
 			
@@ -44,22 +46,16 @@ package be.dreem.ui.layeredSpace.feedback {
 			_tfLabels.textColor = 0xFFFFFF;
 			_tfLabels.defaultTextFormat = new TextFormat("Arial", null, 0xFFFFFF);
 			_tfLabels.mouseEnabled = false;
-			_tfLabels.text = "LayeredSpace: ";
-			//_tfLabels.defaultTextFormat = new TextFormat("Arial", null, 0x0000FF);
+			
+			_tfLabels.text = "LayeredSpace: ";			
 			_tfLabels.setTextFormat(new TextFormat("Arial", null, 0xFF6666), _tfLabels.length - 1);
-			//_tfLabels.textColor = 0xFF00FF;
-			_tfLabels.appendText("\ncurrentFps: ");
-			//_tfLabels.textColor = 0x0000FF;
-			
+			_tfLabels.appendText("\ncurrentFps: ");			
 			_tfLabels.setTextFormat(new TextFormat("Arial", null, 0xFF6666 - 0x555555), _tfLabels.length -1);
-			_tfLabels.appendText("\naverageFps: ");
-			
+			_tfLabels.appendText("\naverageFps: ");			
 			_tfLabels.setTextFormat(new TextFormat("Arial", null, 0x66FF66), _tfLabels.length -1 );
-			_tfLabels.appendText("\nlayers: ");
-			
+			_tfLabels.appendText("\nlayers: ");			
 			_tfLabels.setTextFormat(new TextFormat("Arial", null, 0x66FF66 - 0x555555), _tfLabels.length -1);
-			_tfLabels.appendText("\nviewed layers: ");
-			
+			_tfLabels.appendText("\nviewed layers: ");			
 			_tfLabels..setTextFormat(new TextFormat("Arial", null, 0xFFFFFF), _tfLabels.length -1);
 			_tfLabels.appendText("\nmemory (MB): ");
 			
@@ -68,8 +64,7 @@ package be.dreem.ui.layeredSpace.feedback {
 			_tfValues.multiline = false;
 			_tfValues.textColor = 0xFFFFFF;
 			_tfValues.defaultTextFormat = new TextFormat("Arial", null, null, null, null, null, null, null, "right");
-			_tfValues.mouseEnabled = false;	
-			
+			_tfValues.mouseEnabled = false;			
 			
 			_graph = new Bitmap(new BitmapData(_graphWidth, _numberOfSections * _sectionHeight + _numberOfSections - 1,false,0));
 			_graph.y = _tfLabels.height + 4;
@@ -80,12 +75,22 @@ package be.dreem.ui.layeredSpace.feedback {
 			
 			alpha = .8;
 			
-			//_t = new Timer(1000);
-			//_t.addEventListener(TimerEvent.TIMER, function(e:TimerEvent){updateStats()}, false, 0, true);
-			
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
 			
 			layeredSpace = pLayeredSpace;
+			
+			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);					
+		}
+		
+		private function onAddedToStage(e:Event):void {
+			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, onStageKeyDown, false, 0, true);	
+		}
+		
+		private function onStageKeyDown(e:KeyboardEvent):void {			
+			if (String.fromCharCode(e.charCode).toUpperCase() == toggleKey.toUpperCase()) {
+				visible = !visible;
+			}
 		}
 		
 		private function onMouseDown(e:MouseEvent):void {
@@ -101,9 +106,6 @@ package be.dreem.ui.layeredSpace.feedback {
 		}
 		
 		private function updateStats():void {
-			//if (_ls)
-			//trace("LO");
-			//_tfLabels.textColor = 0xFFFFFF * Math.random();
 			var stats:RenderStats = _ls.getRenderStats();			
 			
 			//draw sections
@@ -128,8 +130,7 @@ package be.dreem.ui.layeredSpace.feedback {
 			_graph.bitmapData.scroll(-1, 0);
 			
 			_tfValues.htmlText =  "v" + LayeredSpace.VERSION + "\n" + stats.currentFps + "\n" + stats.averageFps + "\n" + stats.numberOfLayers + "\n" + stats.numberOfViewedLayers + "\n" + Number(stats.memory / 1024).toPrecision(3);
-			_tfValues.x = _graphWidth - _tfValues.width;
-			
+			_tfValues.x = _graphWidth - _tfValues.width;			
 			
 			graphics.clear();
 			graphics.beginFill(0);
@@ -150,6 +151,20 @@ package be.dreem.ui.layeredSpace.feedback {
 			
 			if (_ls)
 				addEventListener(Event.ENTER_FRAME, function(e:Event){updateStats()});
+		}
+		
+		/**
+		 * automatic dim when the cursor leaves
+		 */
+		public function get autoDim():Boolean {
+			return _autoDim;
+		}
+		
+		/**
+		 * automatic dim when the cursor leaves
+		 */
+		public function set autoDim(value:Boolean):void {
+			_autoDim = value;
 		}
 		
 	}

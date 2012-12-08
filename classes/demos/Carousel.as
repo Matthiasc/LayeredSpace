@@ -143,11 +143,13 @@
 			TweenLite.to(camera, 2, { z:2000, y: -100, ease:Cubic.easeOut } );					
 		}
 		
-		private function onStageKeyDown(e:KeyboardEvent):void {			
+		private function onStageKeyDown(e:KeyboardEvent):void {		
+			_t2.stop();
+			
 			if (parseInt(String.fromCharCode(e.charCode))) {
 				//switch camera
 				
-				_t2.stop();
+				
 				
 				switch(parseInt(String.fromCharCode(e.charCode))) {
 					case 1:

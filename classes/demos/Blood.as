@@ -1,6 +1,4 @@
-﻿package  demos {
-	
-	
+﻿package  demos {	
 	import be.dreem.ui.layeredSpace.cameras.*;
 	import be.dreem.ui.layeredSpace.constants.SortingModes;
 	import be.dreem.ui.layeredSpace.effects.DofEffect;
@@ -10,11 +8,11 @@
 	import be.dreem.ui.layeredSpace.objects.*;
 	import be.dreem.ui.layeredSpace.screens.*;
 	import be.dreem.ui.layeredSpace.layers.*;
+	
 	import com.greensock.easing.Back;
 	import com.greensock.easing.Cubic;
 	import com.greensock.TweenLite;
 	
-
 	import flash.display.*;
 	import flash.geom.Rectangle;
 	import flash.events.*;
@@ -27,8 +25,6 @@
 		public var controls:Sprite;
 		
 		private var text:Sprite;
-		
-		public var btnRestart:Sprite;
 		
 		public var handShakeX:Number = 0;
 		public var handShakeY:Number = 0;
@@ -43,6 +39,8 @@
 		private const MAX_SPLATS:uint = 3;
 		
 		private var _renderStatsGraph:RenderStatsGraph;
+		private var _controlInfo:Sprite;
+		
 		
 		function Blood(){
 			
@@ -78,15 +76,14 @@
 			//screen		
 			screen = new StandardScreen(new Rectangle(0, 0, 200, 200));		
 			screen.backgroundColor = 0xFFFFFF;
-			addChild(screen);
 			screen.blendMode = BlendMode.ADD;
+			addChild(screen);
 			
 			//linkage
 			ls.camera = camera;
 			camera.screen = screen;
 			
 			//visuals
-			
 			_bloodCollection = new Array();
 			
 			var layer:VisualLayer;
@@ -117,32 +114,32 @@
 			addEventListener(Event.ENTER_FRAME, onBloodEnterFrame, false, 0, true);				
 			stage.addEventListener(Event.RESIZE, onStageResize, false, 0, true);
 			
-			//createControls();
-			btnRestart = new BtnRestart();
-			btnRestart.buttonMode = true;
-			btnRestart.blendMode = BlendMode.LAYER;
-			btnRestart.alpha = .5;
-			btnRestart.addEventListener(MouseEvent.CLICK, onBtnRestartClick, false, 0, true);
-			addChild(btnRestart);
+			_controlInfo = new ControlInfo();
+			addChild(_controlInfo);
 			
 			onStageResize();
 			
 			TweenLite.to(camera, 1, { ease:Cubic.easeInOut, x:0 } );
 			
 			_renderStatsGraph = new RenderStatsGraph(ls);
-			//_renderStatsGraph.visible = false;
+			_renderStatsGraph.visible = false;
 			addChild(_renderStatsGraph);
+			
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, onStageKeyDown, false, 0, true);	
 		}
 		
-		private function onBtnRestartClick(e:MouseEvent):void {
-			_splatCount = 0;
-			
-			while (_bloodCollection.length)
-				VisualLayer(_bloodCollection.pop()).removeLayer = true;
+		private function onStageKeyDown(e:KeyboardEvent):void {			
+			if (String.fromCharCode(e.charCode).toUpperCase() == "R") {
 				
-			TweenLite.to(camera, 1, { rotation:0, x:0, y:0, ease:Back.easeOut } );
-			
-			text.buttonMode = true;
+				_splatCount = 0;
+				
+				while (_bloodCollection.length)
+					VisualLayer(_bloodCollection.pop()).removeLayer = true;
+					
+				TweenLite.to(camera, 1, { rotation:0, x:0, y:0, z:1000, angle:45, ease:Back.easeOut } );
+				
+				text.buttonMode = true;				
+			}
 		}
 		
 		private function onBloodEnterFrame(e:Event):void {
@@ -277,19 +274,14 @@
 		
 		public function onStageResize(e:Event=null):void{
 			//resize screen
-			screen.dimensions = new Rectangle(0,0,stage.stageWidth,stage.stageHeight);
+			screen.dimensions = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 			
-			btnRestart.x = stage.stageWidth - btnRestart.width - 10;
-			btnRestart.y = 10;
-			
-			//reposition controls
-			//controls.x = Math.round((stage.stageWidth - controls.width)/2)
-			//controls.y = stage.stageHeight - controls.height;
+			_controlInfo.x = stage.stageWidth * .5;
+			_controlInfo.y = stage.stageHeight;
 		}
 		
 		
-		public function doHandShake():void{
-		
+		public function doHandShake():void {		
 			handShakeX += difference(handShakeX);
 			handShakeY += difference(handShakeY);
 			handShakeZ += difference(handShakeZ);

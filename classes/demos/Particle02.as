@@ -26,6 +26,7 @@ package  demos {
 	*/
 	public class Particle02 extends MovieClip {
 		
+		
 		private var _layeredSpace:LayeredSpace;
 		private var _camera:StandardCamera;
 		private var _screen:StandardScreen;
@@ -37,6 +38,8 @@ package  demos {
 		private const NUMBER_OF_TRAILS:int = 2;
 		
 		private var _glowCollection:Array;
+		
+		private var _controlInfo:Sprite;
 		
 		public function Particle02() {
 			
@@ -56,24 +59,31 @@ package  demos {
 			
 			//camera
 			_camera = new StandardCamera();
-			_camera.angle = 110;
-			_camera.focusDistance
+			_camera.angle = 140;
 			
 			//linkage
 			_layeredSpace.camera = _camera;
 			_camera.screen = _screen;
 			
+			//effects
 			var fogEffect:FogEffect = new FogEffect();
-			fogEffect.value = .09;
+			fogEffect.value = .12;
 			fogEffect.fogMode = FogModes.ALPHA;
 			_layeredSpace.effects.add(fogEffect);
 			
+			/*
 			var dofEffect:DofEffect = new DofEffect();
 			dofEffect.value = 1.5;
 			dofEffect.quality = 2;
 			_layeredSpace.effects.add(dofEffect);
+			*/
+			
+			//control info
+			_controlInfo = new ControlInfo();
+			
 			
 			addChild(_screen);
+			addChild(_controlInfo);
 			
 			//events
 			stage.addEventListener(Event.RESIZE, onStageResize, false, 0, true);
@@ -92,6 +102,7 @@ package  demos {
 			}
 			
 			_renderStatGraph = new RenderStatsGraph(_layeredSpace);
+			_renderStatGraph.visible = false;
 			addChild(_renderStatGraph);
 		}
 		
@@ -200,6 +211,9 @@ package  demos {
 		private function updateDimensions():void {
 			//adjust the dimensions of the canvas
 			_screen.dimensions = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
+			
+			_controlInfo.x = stage.stageWidth * .5;
+			_controlInfo.y = stage.stageHeight;
 		}
 		
 	}

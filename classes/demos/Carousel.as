@@ -1,6 +1,7 @@
 ﻿package  demos {
 	
 	import be.dreem.ui.layeredSpace.constants.*;
+	import be.dreem.ui.layeredSpace.control.KeyboardControl;
 	import be.dreem.ui.layeredSpace.effects.*;
 	import be.dreem.ui.layeredSpace.feedback.RenderStatsGraph;
 	import be.dreem.ui.layeredSpace.geom.*;
@@ -9,6 +10,7 @@
 	import be.dreem.ui.layeredSpace.cameras.*;
 	import be.dreem.ui.layeredSpace.screens.*;
 	import com.greensock.easing.Back;
+	import com.greensock.easing.Cubic;
 	import com.greensock.TweenLite;	
 	
 	import flash.display.*;
@@ -22,9 +24,7 @@
 		public var camera:StandardCamera;
 		public var camera2:StandardCamera;
 		public var camera3:StandardCamera;
-		public var currentCamera:CameraObject;
 		public var screen:StandardScreen;
-		public var controls:Sprite;
 		public var renderStatsGraph:RenderStatsGraph;
 		
 		private var aBalls:Array;
@@ -36,6 +36,10 @@
 		
 		private var _fogEffect:FogEffect;
 		private var _dofEffect:DofEffect;
+		
+		private var _keyboardControl:KeyboardControl;
+		
+		private var _controlInfo:Sprite;
 		
 		function Carousel(){
 			
@@ -61,40 +65,43 @@
 			//create screen
 			screen = new StandardScreen(new Rectangle(0, 0, 300, 300));
 			screen.backgroundColor = 0xFFFFFF;
-			//screen.blendMode = BlendMode.ADD;
 			
-			//create camera
+			//create cameras
+			camera = new StandardCamera();
+			camera.z = 5000;
+			camera.y = -1000;
+			camera.focusDistance = 1800;
+			camera.viewingDistanceStart = 500;		
+			
 			camera2 = new StandardCamera();
-			camera2.position = new Point3D(-100, -400, 1000);
+			camera2.position = new Point3D(-200, -300, 1000);
 			camera2.focusDistance = camera2.z + uiDiameter;
 			camera2.viewingDistanceStart = 100;
 			camera2.rotation = 45;		
-			camera2.angle = 150;
-			camera2.screen = screen;
+			camera2.angle = 150;						
 			
 			camera3 = new StandardCamera();
-			camera3.position = new Point3D(600, -300, 6000);
+			camera3.position = new Point3D(600, -100, 6000);
 			camera3.focusDistance = camera3.z - uiDiameter;
 			camera3.viewingDistanceStart = 500;
-			camera3.angle = 40;
-			camera3.screen = screen;
+			camera3.angle = 40;		
 			
-			currentCamera = camera = new StandardCamera();
-			camera.z = 1800;
-			camera.y = -1000;
-			camera.focusDistance = 1800;
-			camera.viewingDistanceStart = 500;
-			camera.screen = screen;
+			//renderStatistics
 			renderStatsGraph = new RenderStatsGraph(ls);
-			//renderStatsGraph.visible = false;
+			renderStatsGraph.visible = false;
 			
-			TweenLite.to(camera, 1, { y:-200, ease:Back.easeOut } );
+			//control info
+			_controlInfo = new ControlInfo();
 			
 			addChild(screen);
 			addChild(renderStatsGraph);
+			addChild(_controlInfo);
 			
 			//link 
-			ls.camera = camera;			
+			ls.camera = camera;		
+			camera.screen = screen;
+			camera2.screen = screen;
+			camera3.screen = screen;
 			
 			//create circular			
 			aBalls = new Array();			
@@ -118,35 +125,67 @@
 			
 			addEventListener(Event.ENTER_FRAME, update);
 			
-			_t2 = new Timer(2000);
+			//switch between cameras
+			_t2 = new Timer(3000);
 			_t2.addEventListener(TimerEvent.TIMER,randomCamSwitch);
 			_t2.start();
 				
-			stage.addEventListener(Event.RESIZE,onStageResize);
+			stage.addEventListener(Event.RESIZE,onStageResize);	
 			
-			createControls();
-			onStageResize();
+			onStageResize();			
 			
+			//control
+			_keyboardControl = new KeyboardControl(stage);
+			_keyboardControl.camera = ls.camera;
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, onStageKeyDown, false, 0, true);	
+			
+			//animation
+			TweenLite.to(camera, 2, { z:2000, y: -100, ease:Cubic.easeOut } );					
+		}
+		
+		private function onStageKeyDown(e:KeyboardEvent):void {			
+			if (parseInt(String.fromCharCode(e.charCode))) {
+				//switch camera
+				
+				_t2.stop();
+				
+				switch(parseInt(String.fromCharCode(e.charCode))) {
+					case 1:
+						ls.camera = camera;
+					break;
+					
+					case 2:
+						ls.camera = camera2;
+					break;
+					
+					case 3:
+						ls.camera = camera3;
+					break;
+				}				
+			}
 		}
 		
 		private function update(e:Event):void {
 			updateRotation();
 			
-			if(currentCamera.y > -100)
-				currentCamera.y =  -100;
+			if(ls.camera.y > -100)
+				ls.camera.y =  -100;
 			
 			ls.update();
 		}
 		
 		private function randomCamSwitch(e:TimerEvent){
 			var n:Number = Math.random();
-			if(n < 0.33){
-				ls.camera = camera3;
-			}else if(n < 0.5){
+			
+			if(ls.camera == camera){
 				ls.camera = camera2;
+			}else if(ls.camera == camera2){
+				ls.camera = camera3;
 			}else {
 				ls.camera = camera;
 			}
+			
+			_keyboardControl.camera = ls.camera;
 		}
 		
 		private function updateRotation():void {
@@ -171,171 +210,22 @@
 		
 		public function onStageResize(e:Event=null):void{
 			//resize screen
-			screen.dimensions = new Rectangle(100,100,stage.stageWidth - 200,stage.stageHeight - 200 - controls.height);
-			screen.dimensions = new Rectangle(0,0,stage.stageWidth,stage.stageHeight);
+			screen.dimensions = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 			
-			//reposition controls
-			controls.x = Math.round((stage.stageWidth - controls.width)/2)
-			controls.y = stage.stageHeight - controls.height;
-		}
-		
-		private function createControls():void{
-			controls = new Controls();
-			
-			addChild(controls);
-			
-			var s:Sprite;
-			
-			s = controls.getChildByName("xUp_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,xUp, false, 0, true);
-			
-			s = controls.getChildByName("xDown_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,xDown, false, 0, true);
-			
-			s = controls.getChildByName("yUp_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,yUp, false, 0, true);
-			
-			s = controls.getChildByName("yDown_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,yDown, false, 0, true);
-			
-			s = controls.getChildByName("zUp_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,zUp, false, 0, true);
-			
-			s = controls.getChildByName("zDown_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,zDown, false, 0, true);
-			
-			s = controls.getChildByName("focusUp_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,focusUp, false, 0, true);
-			
-			s = controls.getChildByName("focusDown_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,focusDown, false, 0, true);
-			
-			s = controls.getChildByName("angleUp_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,angleUp, false, 0, true);
-			
-			s = controls.getChildByName("angleDown_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,angleDown, false, 0, true);
-			
-			s = controls.getChildByName("rotationUp_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,rotationUp, false, 0, true);
-			
-			s = controls.getChildByName("rotationDown_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,rotationDown, false, 0, true);
-			
-			s = controls.getChildByName("dof_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK, dof, false, 0, true);
-			
-			s = controls.getChildByName("fog_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,fog, false, 0, true);
-			
-			s = controls.getChildByName("details_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,details, false, 0, true);
-			
-			s = controls.getChildByName("cam1_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,cam1, false, 0, true);
-			
-			s = controls.getChildByName("cam2_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK,cam2, false, 0, true);
-			
-			s = controls.getChildByName("cam3_mc") as Sprite;
-			s.buttonMode = true;
-			s.addEventListener(MouseEvent.CLICK, cam3, false, 0, true);
-		}
-	
-		private function xUp(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, x:ls.camera.x + 100  } );
-		}
-		
-		private function xDown(e:MouseEvent):void {
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, x:ls.camera.x - 100 } );
-		}
-		
-		private function yUp(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, y:ls.camera.y - 100  } );
-		}
-		
-		private function yDown(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, y:((currentCamera.y > -100) ? -100 : currentCamera.y + 100) } );			
-		}
-		
-		private function zUp(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, z:currentCamera.z + 100 } );
-		}
-		
-		private function zDown(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, z:currentCamera.z - 100 } );
-		}
-		
-		private function focusUp(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, focusDistance:currentCamera.focusDistance + 100 } );
-		}
-		
-		private function focusDown(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, focusDistance:currentCamera.focusDistance - 100 } );
-		}
-		
-		private function angleUp(e:MouseEvent):void{
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, angle:currentCamera.angle + 25 } );
-		}
-		
-		private function angleDown(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, angle:currentCamera.angle - 25 } );
-		}
-		
-		private function rotationUp(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, rotation:currentCamera.rotation + 45 } );
-		}
-		
-		private function rotationDown(e:MouseEvent):void { 
-			TweenLite.to(currentCamera, 1, {ease:Back.easeOut, rotation:currentCamera.rotation - 45 } );
+			_controlInfo.x = stage.stageWidth * .5;
+			_controlInfo.y = stage.stageHeight;
 		}
 		
 		private function dof(e:MouseEvent):void{
-			//currentCamera.useDepthOfField = !currentCamera.useDepthOfField;
 			_dofEffect.enable = !_dofEffect.enable;
 		}
 		
 		private function details(e:MouseEvent):void{
-			//screen.showRenderDetails = !screen.showRenderDetails;
-			//screen.showRenderDetails
 			renderStatsGraph.visible = !renderStatsGraph.visible;
-
 		}
 		
 		private function fog(e:MouseEvent):void {
 			_fogEffect.enable = !_fogEffect.enable;
-		}
-		
-		private function cam1(e:MouseEvent):void {
-			_t2.stop();
-			ls.camera = currentCamera = camera;
-		}
-		
-		private function cam2(e:MouseEvent):void {
-			_t2.stop();
-			ls.camera = currentCamera = camera2;
-		}
-		
-		private function cam3(e:MouseEvent):void {
-			_t2.stop();
-			ls.camera = currentCamera = camera3;
 		}
 	}	
 }

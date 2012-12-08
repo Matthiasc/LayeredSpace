@@ -46,6 +46,7 @@ package be.dreem.ui.layeredSpace.effects {
 		override public function render(visualObject:VisualObject, projection:Projection2D, camera:CameraObject):BitmapFilter {
 			
 			//TODO: find a solution to only set layers that have a different fog property.
+			//maybe create a data property on layers which can store fog settings 
 			//very bad performance wise if you keep setting the same fog on a visualObject
 			
 			var ratio:Number = ((projection.zDepth - _nStartDistance) * value * .001); 

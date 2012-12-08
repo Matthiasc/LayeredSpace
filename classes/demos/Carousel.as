@@ -147,9 +147,7 @@
 			_t2.stop();
 			
 			if (parseInt(String.fromCharCode(e.charCode))) {
-				//switch camera
-				
-				
+				//switch camera				
 				
 				switch(parseInt(String.fromCharCode(e.charCode))) {
 					case 1:

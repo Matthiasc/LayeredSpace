@@ -16,6 +16,9 @@ package be.dreem.ui.layeredSpace.objects {
 		
 		private var _nFocusDistance:Number = 1000;
 		
+		private var _nViewingDistanceStart:Number = 100;
+		private var _nViewingDistanceEnd:Number = 0;
+		
 		public var effects:Effects;
 		
 		public function CameraObject() {
@@ -89,6 +92,42 @@ package be.dreem.ui.layeredSpace.objects {
 			}else{
 				_nAngle = n;
 			}
-		}		
+		}	
+		
+		/**
+		 * The z distance from the camera to the point from wich layers can be seen
+		 * Example: If viewingDistanceStart is set at 100, all layers that are closer to the camera then 100 will not be seen.
+		 */
+		public function get viewingDistanceStart():Number { return _nViewingDistanceStart; }
+		
+		/**
+		 * The z distance from the camera to the point from wich layers can be seen
+		 * Example: If viewingDistanceStart is set at 100, all layers that are closer to the camera then 100 will not be seen.
+		 */
+		public function set viewingDistanceStart(n:Number):void {
+			_nViewingDistanceStart = (n < 0) ? 0 : n;
+		}
+		
+		/**
+		 * The z distance from the camera to the point from wich layers can not be seen.
+		 * The viewingDistanceEnd will always be greater then the viewingDistanceStart
+		 * If set 0 the camera will see without restriction.
+		 * Example: If viewingDistanceEnd is set at 5000, all layers that are further away then 5000 will not be seen.
+		 */
+		public function get viewingDistanceEnd():Number { return _nViewingDistanceEnd; }
+		
+		/**
+		 * The z distance from the camera to the point from wich layers can not be seen.
+		 * The viewingDistanceEnd will always be greater then the viewingDistanceStart
+		 * If set 0 the camera will see without restriction.
+		 * Example: If viewingDistanceEnd is set at 5000, all layers that are further away then 5000 will not be seen.
+		 */
+		public function set viewingDistanceEnd(n:Number):void {
+			_nViewingDistanceEnd = (n < _nViewingDistanceStart) ? _nViewingDistanceStart : n;
+		}
+		
+		override public function toString():String {
+			return "CameraObject: x:" + x + " y:" + y + " z:" + z + " rotation:" + rotation + " angle:" + angle + " focusDistance:" + focusDistance;
+		}
 	}
 }

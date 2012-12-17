@@ -34,6 +34,7 @@ package be.dreem.ui.layeredSpace.control {
 		 * Time needed to tween each movement
 		 */
 		public var speed:Number = 1;
+		
 			
 		/**
 		 * qwerty keyboard, can use other bindings for azerty
@@ -139,7 +140,7 @@ package be.dreem.ui.layeredSpace.control {
 		}		
 		
 		private function tween(camera:CameraObject, duration:Number, propertyName:String, propertyIncrement:Number) {
-			camera[propertyName] += propertyIncrement;				
+			camera[propertyName] += propertyIncrement;			
 		}		
 		
 		/**

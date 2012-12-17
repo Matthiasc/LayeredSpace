@@ -151,15 +151,15 @@
 				
 				switch(parseInt(String.fromCharCode(e.charCode))) {
 					case 1:
-						ls.camera = camera;
+						_keyboardControl.camera = ls.camera = camera;
 					break;
 					
 					case 2:
-						ls.camera = camera2;
+						_keyboardControl.camera = ls.camera = camera2;
 					break;
 					
 					case 3:
-						ls.camera = camera3;
+						_keyboardControl.camera = ls.camera = camera3;
 					break;
 				}				
 			}

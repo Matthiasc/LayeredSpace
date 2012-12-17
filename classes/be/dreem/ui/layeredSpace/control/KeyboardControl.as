@@ -1,12 +1,14 @@
 package be.dreem.ui.layeredSpace.control {
 	import be.dreem.ui.layeredSpace.objects.CameraObject;
 	import com.greensock.TweenLite;
+	import flash.display.Shape;
 	import flash.display.Stage;
+	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.ui.Keyboard;
 	/**
-	 * KeyboardControl lets you control a camera through keyboard
-	 * @author ...
+	 * KeyboardControl lets you have basic control over a camera through keyboard
+	 * @author Matthias Crommelinck
 	 */
 	public class KeyboardControl {
 		
@@ -31,10 +33,13 @@ package be.dreem.ui.layeredSpace.control {
 		public static const TRACE_CAMERA_PROPERTIES:String = "traceCameraProperties";
 		
 		/**
-		 * Time needed to tween each movement
+		 * Time needed to tween each movement in ms
 		 */
-		public var speed:Number = 1;
+		public var speed:Number = 250;
 		
+		
+		private var _shape:Shape;
+		private var _oTween:Object;
 			
 		/**
 		 * qwerty keyboard, can use other bindings for azerty
@@ -63,23 +68,23 @@ package be.dreem.ui.layeredSpace.control {
 												];
 												
 		private var _controlBinding:Array = [
-													[X_UP, "x", 10],
-													[X_DOWN, "x", -10],
+													[X_UP, "x", 100],
+													[X_DOWN, "x", -100],
 													
-													[Y_UP, "y", 10],
-													[Y_DOWN, "y", -10],
+													[Y_UP, "y", 100],
+													[Y_DOWN, "y", -100],
 													
-													[Z_UP, "z", 10],
-													[Z_DOWN, "z", -10],
+													[Z_UP, "z", 100],
+													[Z_DOWN, "z", -100],
 													
-													[ROTATE_CW, "rotation", 1],
-													[ROTATE_CCW, "rotation", -1],
+													[ROTATE_CW, "rotation", 10],
+													[ROTATE_CCW, "rotation", -10],
 													
-													[FOCUS_UP, "focusDistance", 10],
-													[FOCUS_DOWN, "focusDistance", -10],
+													[FOCUS_UP, "focusDistance", 100],
+													[FOCUS_DOWN, "focusDistance", -100],
 													
-													[ANGLE_UP, "angle", 1],
-													[ANGLE_DOWN, "angle", -1]
+													[ANGLE_UP, "angle", 10],
+													[ANGLE_DOWN, "angle", -10]
 		
 												];
 		
@@ -88,7 +93,9 @@ package be.dreem.ui.layeredSpace.control {
 		
 		public function KeyboardControl(stage:Stage) {
 			_stage = stage;
-			_stage.addEventListener(KeyboardEvent.KEY_DOWN, onStageKeyDown, false, 0, true);			
+			_stage.addEventListener(KeyboardEvent.KEY_DOWN, onStageKeyDown, false, 0, true);	
+			
+			_shape = new Shape();
 		}
 		
 		private function onStageKeyDown(e:KeyboardEvent):void {
@@ -121,27 +128,45 @@ package be.dreem.ui.layeredSpace.control {
 		 * @param	slow		if true, camera movement will be slower
 		 */
 		public function command(command:String, slow:Boolean = false) {
-			if (_camera) {
-				
-				if (command) {
+			if(!_oTween &&_camera && command)						
+				if (command == TRACE_CAMERA_PROPERTIES) {
+					trace(_camera.toString());
+				}else {
+					var a:Array;					
+					for (var i:int = 0; i < _controlBinding.length; i++)
+						if (command == _controlBinding[i][0])
+							a = _controlBinding[i];
 					
-					if (command == TRACE_CAMERA_PROPERTIES) {
-						trace(_camera.toString());
-					}else {
-						var a:Array;					
-						for (var i:int = 0; i < _controlBinding.length; i++)
-							if (command == _controlBinding[i][0])
-								a = _controlBinding[i];
-						
-						tween(_camera, speed * ((slow) ? .5 : 1 ), a[1], a[2]* ((slow) ? .5 : 1 ));
-					}					
+					createTween(_camera, speed * ((slow) ? .5 : 1 ), a[1], a[2]* ((slow) ? .5 : 1 ));
 				}
-			}
-		}		
+		}
 		
-		private function tween(camera:CameraObject, duration:Number, propertyName:String, propertyIncrement:Number) {
-			camera[propertyName] += propertyIncrement;			
-		}		
+		private function createTween(camera:CameraObject, duration:Number, propertyName:String, propertyIncrement:Number) {			
+			_oTween = {camera:camera, prop: propertyName, propStart: camera[propertyName], propEnd: camera[propertyName] + propertyIncrement, duration:duration, durationStart:new Date().getTime(), durationEnd:new Date().getTime() + duration }
+			_shape.addEventListener(Event.ENTER_FRAME, onShapeEnterFrame, false, 0, true);
+			tween();
+		}	
+		
+		private function onShapeEnterFrame(e:Event):void {
+			tween();
+		}
+		
+		private function tween() {
+			if (_oTween) {
+				var now:Number = new Date().getTime();
+				
+				if (now >= _oTween.durationEnd) {					
+					//target reached, stop tween
+					_oTween.camera[_oTween.prop] = _oTween.propEnd;
+					_oTween = null;
+					_shape.removeEventListener(Event.ENTER_FRAME, onShapeEnterFrame);					
+				}else {
+					//tween
+					var timeRatio:Number = (now - _oTween.durationStart) / (_oTween.durationEnd - _oTween.durationStart);
+					_oTween.camera[_oTween.prop] = ((Math.pow(timeRatio, 4) ) *  (_oTween.propEnd - _oTween.propStart)) + _oTween.propStart; 
+				}				
+			}
+		}
 		
 		/**
 		 * the camera being controlled

@@ -1,1 +1,0 @@
-An attempt to create a simplistic 3d engine that only positions, rotates and scales layers. Ideal to place objects pixel perfect in 3d space, for animating matte painting, parallax, tile based games, etc.
